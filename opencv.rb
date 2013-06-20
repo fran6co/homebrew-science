@@ -9,6 +9,7 @@ class Opencv < Formula
   option 'with-qt',  'Build the Qt4 backend to HighGUI'
   option 'with-tbb', 'Enable parallel code in OpenCV using Intel TBB'
   option 'without-opencl', 'Disable gpu code in OpenCV using OpenCL'
+  option 'with-openni', 'Enable support for OpenNI.'
 
   depends_on 'cmake' => :build
   depends_on 'pkg-config' => :build
@@ -20,6 +21,7 @@ class Opencv < Formula
   depends_on 'jasper'  => :optional
   depends_on 'tbb'     => :optional
   depends_on 'qt'      => :optional
+  depends_on 'totakke/openni/openni' if build.with? 'openni'
   depends_on :libpng
 
   # Can also depend on ffmpeg, but this pulls in a lot of extra stuff that
@@ -27,8 +29,11 @@ class Opencv < Formula
   # in Homebrew anyway. Will depend on openexr if it's installed.
 
   def patches
-    # Find openCL headers on case sensitive fs: https://github.com/Homebrew/homebrew-science/pull/200
-    'https://github.com/Itseez/opencv/commit/6e119049ce3228ca82acb7f4aaa2f4bceeddcbdf.patch'
+    [
+      # Find openCL headers on case sensitive fs: https://github.com/Homebrew/homebrew-science/pull/200
+      'https://github.com/Itseez/opencv/commit/6e119049ce3228ca82acb7f4aaa2f4bceeddcbdf.patch',
+       DATA
+    ]
   end
 
   def install
@@ -53,6 +58,7 @@ class Opencv < Formula
     end
     args << '-DWITH_QT=ON' if build.with? 'qt'
     args << '-DWITH_TBB=ON' if build.with? 'tbb'
+    args << '-DWITH_OPENNI=ON' if build.with? 'openni'
     # OpenCL 1.1 is required, but Snow Leopard and older come with 1.0
     args << '-DWITH_OPENCL=OFF' if build.without? 'opencl' or MacOS.version < :lion
 
@@ -69,3 +75,20 @@ class Opencv < Formula
     python.standard_caveats if python
   end
 end
+# If openni was installed using homebrew, look for it on the proper path
+__END__
+diff --git a/cmake/OpenCVFindOpenNI.cmake b/cmake/OpenCVFindOpenNI.cmake
+index 7541868..f1455e8 100644
+--- a/cmake/OpenCVFindOpenNI.cmake
++++ b/cmake/OpenCVFindOpenNI.cmake
+@@ -26,8 +26,8 @@ if(WIN32)
+         find_library(OPENNI_LIBRARY "OpenNI64" PATHS $ENV{OPEN_NI_LIB64} DOC "OpenNI library")
+     endif()
+ elseif(UNIX OR APPLE)
+-    find_file(OPENNI_INCLUDES "XnCppWrapper.h" PATHS "/usr/include/ni" "/usr/include/openni" DOC "OpenNI c++ interface header")
+-    find_library(OPENNI_LIBRARY "OpenNI" PATHS "/usr/lib" DOC "OpenNI library")
++    find_file(OPENNI_INCLUDES "XnCppWrapper.h" PATHS "HOMEBREW_PREFIX/include/ni" "/usr/include/ni" "/usr/include/openni" DOC "OpenNI c++ interface header")
++    find_library(OPENNI_LIBRARY "OpenNI" PATHS "HOMEBREW_PREFIX/lib" "/usr/lib" DOC "OpenNI library")
+ endif()
+
+ if(OPENNI_LIBRARY AND OPENNI_INCLUDES)
