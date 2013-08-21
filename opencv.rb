@@ -2,8 +2,8 @@ require 'formula'
 
 class Opencv < Formula
   homepage 'http://opencv.org/'
-  url 'http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.5/opencv-2.4.5.tar.gz'
-  sha1 '9e25f821db9e25aa454a31976ba6b5a3a50b6fa4'
+  url 'http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.6.1/opencv-2.4.6.1.tar.gz'
+  sha1 'e015bd67218844b38daf3cea8aab505b592a66c0'
 
   option '32-bit'
   option 'with-qt',  'Build the Qt4 backend to HighGUI'
@@ -24,16 +24,14 @@ class Opencv < Formula
   depends_on 'totakke/openni/openni' if build.with? 'openni'
   depends_on :libpng
 
+
   # Can also depend on ffmpeg, but this pulls in a lot of extra stuff that
   # you don't need unless you're doing video analysis, and some of it isn't
   # in Homebrew anyway. Will depend on openexr if it's installed.
 
   def patches
-    [
-      # Find openCL headers on case sensitive fs: https://github.com/Homebrew/homebrew-science/pull/200
-      'https://github.com/Itseez/opencv/commit/6e119049ce3228ca82acb7f4aaa2f4bceeddcbdf.patch',
-       DATA
-    ]
+    # fixes something small
+    DATA
   end
 
   def install
