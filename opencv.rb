@@ -24,9 +24,15 @@ class Opencv < Formula
   depends_on 'totakke/openni/openni' if build.with? 'openni'
   depends_on :libpng
 
+
   # Can also depend on ffmpeg, but this pulls in a lot of extra stuff that
   # you don't need unless you're doing video analysis, and some of it isn't
   # in Homebrew anyway. Will depend on openexr if it's installed.
+
+  def patches
+    # fixes something small
+    DATA
+  end
 
   def install
     args = std_cmake_args + %W[
